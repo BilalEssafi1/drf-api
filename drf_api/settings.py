@@ -34,7 +34,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-cc+u@smn+i@b=)#^-(9e00u3#=zouj33x(w-c^ff2&q8g8y^%r'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['8000-bilalessafi1-drfapi-3ety8hg1ccw.ws.codeinstitute-ide.net']
 
@@ -52,6 +52,12 @@ INSTALLED_APPS = [
     'profiles',
     'rest_framework',
     'cloudinary',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://8000-bilalessafi1-drfapi-3ety8hg1ccw.ws.codeinstitute-ide.net',
+    'http://127.0.0.1:8000',
+    'https://127.0.0.1:8000', 
 ]
 
 MIDDLEWARE = [
