@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'cloudinary_storage',
     'django.contrib.staticfiles',
+    'django_filters',
     'profiles',
     'posts',
     'comments',
