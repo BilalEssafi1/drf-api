@@ -68,6 +68,7 @@ DEBUG = False
 ALLOWED_HOSTS = [
     '8000-bilalessafi1-drfapi-3ety8hg1ccw.ws.codeinstitute-ide.net',
     'localhost',
+    'drf-api-green-social-61be33473742.herokuapp.com/',
     '.herokuapp.com']
 
 
