@@ -68,8 +68,9 @@ DEBUG = False
 ALLOWED_HOSTS = [
     '8000-bilalessafi1-drfapi-3ety8hg1ccw.ws.codeinstitute-ide.net',
     'localhost',
-    'drf-api-green-social-61be33473742.herokuapp.com/',
-    '.herokuapp.com']
+    'drf-api-green-social-61be33473742.herokuapp.com',
+    '.herokuapp.com',
+]
 
 
 # Application definition
@@ -104,7 +105,9 @@ SITE_ID = 1
 CSRF_TRUSTED_ORIGINS = [
     'https://8000-bilalessafi1-drfapi-3ety8hg1ccw.ws.codeinstitute-ide.net',
     'http://127.0.0.1:8000',
-    'https://127.0.0.1:8000', 
+    'https://127.0.0.1:8000',
+    'https://ecosphere-social-8d56a42d0db7.herokuapp.com',
+    'https://3000-bilalessafi1-ecosphere-h5z3fswcj34.ws.codeinstitute-ide.net',
 ]
 
 MIDDLEWARE = [
@@ -122,9 +125,9 @@ if 'CLIENT_ORIGIN' in os.environ:
     CORS_ALLOWED_ORIGINS = [
         os.environ.get('CLIENT_ORIGIN')
     ]
-else:
-    CORS_ALLOWED_ORIGIN_REGEXES = [
-        r"^https:\/\/.*\.codeinstitute-ide\.net$",
+elif 'CLIENT_ORIGIN_DEV' in os.environ:
+    CORS_ALLOWED_ORIGINS = [
+        os.environ.get('CLIENT_ORIGIN_DEV')
     ]
 
 CORS_ALLOW_CREDENTIALS = True
