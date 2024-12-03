@@ -13,7 +13,7 @@ class Profile(models.Model):
     name = models.CharField(max_length=255, blank=True)
     content = models.TextField(blank=True)
     image = CloudinaryField(
-        'image', blank=True, default='../coffee'
+        'image', blank=True, null=True
     )
 
     class Meta:

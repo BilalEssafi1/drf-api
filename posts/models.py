@@ -31,7 +31,7 @@ class Post(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField(blank=True)
     image = CloudinaryField(
-        'image', blank=True, default='../coffee'
+        'image', blank=True, null=True
     )
     image_filter = models.CharField(
         max_length=32, choices=image_filter_choices, default='normal'
