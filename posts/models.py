@@ -1,5 +1,4 @@
 from django.db import models
-from cloudinary.models import CloudinaryField
 from django.contrib.auth.models import User
 
 # Create your models here.
@@ -30,8 +29,8 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     title = models.CharField(max_length=255)
     content = models.TextField(blank=True)
-    image = CloudinaryField(
-        'image', blank=True, null=True
+    image = models.ImageField(
+        upload_to='images/', default='../coffee', blank=True
     )
     image_filter = models.CharField(
         max_length=32, choices=image_filter_choices, default='normal'
