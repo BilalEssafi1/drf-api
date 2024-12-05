@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
     'django_filters',
     'rest_framework.authtoken',
     'dj_rest_auth',
@@ -98,7 +99,6 @@ INSTALLED_APPS = [
     'likes',
     'followers',
     'rest_framework',
-    'cloudinary',
 ] 
 SITE_ID = 1
 
