@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from cloudinary_storage.storage import MediaCloudinaryStorage
+from django.contrib.auth.models import User
 
 class Tag(models.Model):
     """
@@ -22,7 +24,11 @@ class Post(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
     shareable_url = models.URLField(blank=True)
-    image = models.ImageField(upload_to='posts/', blank=True, null=True, default='../coffee') 
+    image = models.ImageField(
+        upload_to='posts/', 
+        blank=True, null=True, 
+        default='green-apple_iubz3m',
+        storage=MediaCloudinaryStorage()) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
