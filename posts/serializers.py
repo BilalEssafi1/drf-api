@@ -93,5 +93,5 @@ class PostSerializer(serializers.ModelSerializer):
             'profile_image', 'title', 'content', 'image',
             'created_at', 'updated_at', 'like_id',
             'likes_count', 'comments_count', 
-            'add_hashtags', 'tags',  # Renamed input field
+            'add_hashtags', 'tags',
         ]
