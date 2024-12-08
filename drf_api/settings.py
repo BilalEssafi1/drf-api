@@ -69,7 +69,7 @@ if not SECRET_KEY:
     raise ValueError("The SECRET_KEY environment variable is not set!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '8000-bilalessafi1-drfapi-3ety8hg1ccw.ws.codeinstitute-ide.net',
