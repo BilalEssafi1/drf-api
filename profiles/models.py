@@ -15,7 +15,7 @@ class Profile(models.Model):
     image = models.ImageField(
         upload_to='profiles/', 
         blank=True, null=True, 
-        default='https://res.cloudinary.com/dsplumfvt/image/upload/v1733478884/green-apple_iubz3m.jpg',
+        default='green-apple_iubz3m',
         storage=MediaCloudinaryStorage()) 
 
     class Meta:

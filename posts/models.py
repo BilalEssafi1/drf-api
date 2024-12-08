@@ -27,7 +27,7 @@ class Post(models.Model):
     image = models.ImageField(
         upload_to='posts/', 
         blank=True, null=True, 
-        default='https://res.cloudinary.com/dsplumfvt/image/upload/v1733478884/green-apple_iubz3m.jpg',
+        default='green-apple_iubz3m',
         storage=MediaCloudinaryStorage()) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
