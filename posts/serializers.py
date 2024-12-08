@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from posts.models import Post, Tag
 from likes.models import Like
+import re
 
 class PostSerializer(serializers.ModelSerializer):
     """
     Serializer for the Post model.
-    Includes fields for post details, user interactions, and validation for image size.
+    Includes validation for images and dynamic user-generated hashtags.
     """
     owner = serializers.ReadOnlyField(source='owner.username')
     is_owner = serializers.SerializerMethodField()
@@ -14,24 +15,64 @@ class PostSerializer(serializers.ModelSerializer):
     like_id = serializers.SerializerMethodField()
     likes_count = serializers.ReadOnlyField()
     comments_count = serializers.ReadOnlyField()
-    tags = serializers.SlugRelatedField(slug_field='name', queryset=Tag.objects.all(), many=True) 
+    
+    # Renamed field with help text
+    add_hashtags = serializers.CharField(
+        write_only=True,
+        required=False,
+        allow_blank=True,
+        help_text="Add words only, separated by commas (e.g., nature, travel, food)"
+    )
+    
+    # For output: return list of tag names
+    tags = serializers.SerializerMethodField()
 
-    # Validation for image size, height, and width
-    def validate_image(self, value):
-        if value.size > 2 * 1024 * 1024:
-            raise serializers.ValidationError('Image size larger than 2MB!')
-        if value.image.height > 4096: 
-            raise serializers.ValidationError('Image height larger than 4096px!')
-        if value.image.width > 4096: 
-            raise serializers.ValidationError('Image width larger than 4096px!')
+    def validate_add_hashtags(self, value):
+        """
+        Validate that hashtags contain only letters, numbers, and underscores
+        """
+        if value:
+            tags = [tag.strip() for tag in value.split(',')]
+            for tag in tags:
+                if not re.match(r'^[\w]+$', tag):
+                    raise serializers.ValidationError(
+                        f"'{tag}' is not valid. Please use only letters, numbers, and underscores."
+                    )
         return value
 
-    # Custom method to check if the current user is the owner of the post
+    def validate_image(self, value):
+        if value.size > 2 * 1024 * 1024:  # 2MB size limit
+            raise serializers.ValidationError("Image size larger than 2MB!")
+        if value.image.height > 4096:  # Max height 4096px
+            raise serializers.ValidationError("Image height larger than 4096px!")
+        if value.image.width > 4096:  # Max width 4096px
+            raise serializers.ValidationError("Image width larger than 4096px!")
+        return value
+
+    def create(self, validated_data):
+        tags_input = validated_data.pop('add_hashtags', '')  # Get the plain text tags
+        tag_names = self.extract_hashtags(tags_input)
+        
+        post = Post.objects.create(**validated_data)
+        
+        # Create or get tags and associate them with the post
+        for tag_name in tag_names:
+            # Remove the # symbol when storing in database
+            clean_tag_name = tag_name.lstrip('#')
+            tag, created = Tag.objects.get_or_create(name=clean_tag_name)
+            post.tags.add(tag)
+        
+        return post
+
+    def extract_hashtags(self, tags):
+        if tags:
+            return [f"#{tag.strip()}" for tag in tags.split(',') if tag.strip()]
+        return []
+
     def get_is_owner(self, obj):
         request = self.context['request']
         return request.user == obj.owner
 
-    # Custom method to get the like ID for the current user, if they have liked the post
     def get_like_id(self, obj):
         user = self.context['request'].user
         if user.is_authenticated:
@@ -39,19 +80,18 @@ class PostSerializer(serializers.ModelSerializer):
             return like.id if like else None
         return None
 
-    # Dynamically calculate likes count by checking how many likes the post has
-    def get_likes_count(self, obj):
-        return obj.likes.count()
-
-    # Dynamically calculate comments count by checking how many comments are associated with the post
-    def get_comments_count(self, obj):
-        return obj.comments.count()
+    def get_tags(self, obj):
+        """
+        Return list of tag names with # symbol for the post
+        """
+        return [f"#{tag.name}" for tag in obj.tags.all()]
 
     class Meta:
         model = Post
         fields = [
-            'id', 'owner', 'is_owner', 'profile_id', 
-            'profile_image', 'created_at', 'updated_at', 
-            'title', 'content', 'image', 
-            'like_id', 'likes_count', 'comments_count', 'tags',
+            'id', 'owner', 'is_owner', 'profile_id',
+            'profile_image', 'title', 'content', 'image',
+            'created_at', 'updated_at', 'like_id',
+            'likes_count', 'comments_count', 
+            'add_hashtags', 'tags',  # Renamed input field
         ]

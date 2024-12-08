@@ -5,11 +5,10 @@ from drf_api.permissions import IsOwnerOrReadOnly
 from .models import Post
 from .serializers import PostSerializer
 
-
 class PostList(generics.ListCreateAPIView):
     """
-    List posts or create a post if logged in
-    The perform_create method associates the post with the logged in user.
+    List posts or create a post if logged in.
+    The perform_create method associates the post with the logged-in user.
     """
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -26,10 +25,12 @@ class PostList(generics.ListCreateAPIView):
         'owner__followed__owner__profile',
         'likes__owner__profile',
         'owner__profile',
+        'tags__name',  # Allows filtering by hashtags
     ]
     search_fields = [
         'owner__username',
         'title',
+        'tags__name',  # Allows searching by hashtags
     ]
     ordering_fields = [
         'likes_count',
@@ -38,6 +39,9 @@ class PostList(generics.ListCreateAPIView):
     ]
 
     def perform_create(self, serializer):
+        """
+        Associates the post with the currently logged-in user.
+        """
         serializer.save(owner=self.request.user)
 
 
