@@ -182,7 +182,13 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'cache-control',
+    'pragma',
 ]
+
+# Additional CORS settings
+CORS_EXPOSE_HEADERS = ['content-type', 'x-csrftoken']
+CORS_PREFLIGHT_MAX_AGE = 86400
 
 ROOT_URLCONF = 'drf_api.urls'
 
