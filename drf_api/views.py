@@ -15,18 +15,23 @@ def root_route(request):
 # dj-rest-auth logout view fix
 @api_view(['POST'])
 def logout_route(request):
-    """
-    Custom logout route to ensure cookies are explicitly deleted.
-    """
-    response = Response({"message": "Successfully logged out"})
-    response.delete_cookie(
-        key=JWT_AUTH_COOKIE,
-        samesite=JWT_AUTH_SAMESITE,
-        secure=JWT_AUTH_SECURE,
-    )
-    response.delete_cookie(
-        key=JWT_AUTH_REFRESH_COOKIE,
-        samesite=JWT_AUTH_SAMESITE,
-        secure=JWT_AUTH_SECURE,
-    )
-    return response
+   response = Response()
+   response.set_cookie(
+       key=JWT_AUTH_COOKIE,
+       value='',
+       httponly=True,
+       expires='Thu, 01 Jan 1970 00:00:00 GMT',
+       max_age=0,
+       samesite=JWT_AUTH_SAMESITE,
+       secure=JWT_AUTH_SECURE,
+   )
+   response.set_cookie(
+       key=JWT_AUTH_REFRESH_COOKIE,
+       value='',
+       httponly=True,
+       expires='Thu, 01 Jan 1970 00:00:00 GMT',
+       max_age=0,
+       samesite=JWT_AUTH_SAMESITE,
+       secure=JWT_AUTH_SECURE,
+   )
+   return response
