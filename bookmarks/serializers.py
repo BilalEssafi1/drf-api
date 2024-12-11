@@ -15,29 +15,27 @@ class BookmarkFolderSerializer(serializers.ModelSerializer):
 
 class BookmarkSerializer(serializers.ModelSerializer):
     """
-    Serializer for bookmarks. Provides comprehensive post and folder details.
+    Serializer for bookmarks.
+    Handles bookmark creation and validation with simplified fields.
     """
     owner = serializers.ReadOnlyField(source='owner.username')
     post_title = serializers.ReadOnlyField(source='post.title')
-    post_content = serializers.ReadOnlyField(source='post.content')
-    post_image = serializers.ReadOnlyField(source='post.image')
-    post_owner = serializers.ReadOnlyField(source='post.owner.username')
     folder_name = serializers.ReadOnlyField(source='folder.name')
 
     class Meta:
         model = Bookmark
         fields = [
-            'id', 'owner', 
-            'post', 'post_title', 'post_content', 'post_image', 'post_owner',
-            'folder', 'folder_name', 
-            'created_at'
+            'id', 'owner', 'post', 'post_title',
+            'folder', 'folder_name', 'created_at'
         ]
         read_only_fields = ['owner']
 
     def validate(self, data):
         """
-        Validate the bookmark data
+        Validate bookmark data.
+        Ensures required fields are present and no duplicates exist.
         """
+        # Check required fields
         if not data.get('post'):
             raise serializers.ValidationError({
                 'post': 'This field is required.'
@@ -56,8 +54,8 @@ class BookmarkSerializer(serializers.ModelSerializer):
                 folder=data.get('folder')
             ).exists()
             if existing:
-                raise serializers.ValidationError(
-                    "You have already bookmarked this post in this folder."
-                )
+                raise serializers.ValidationError({
+                    'detail': "You have already bookmarked this post in this folder."
+                })
 
         return data

@@ -1,11 +1,15 @@
 from django.shortcuts import render
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from django.db import IntegrityError
 from django.db.models import Count
 from django.core.exceptions import ValidationError
 from .models import BookmarkFolder, Bookmark
 from .serializers import BookmarkFolderSerializer, BookmarkSerializer
 from drf_api.permissions import IsOwnerOrReadOnly
+import logging
+
+logger = logging.getLogger(__name__)
 
 class BookmarkFolderList(generics.ListCreateAPIView):
     """
@@ -39,22 +43,39 @@ class BookmarkList(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         """
-        Override create method to handle owner field and provide better error handling
+        Override create method to handle bookmark creation with error handling
         """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
         try:
+            logger.info(f"Creating bookmark with data: {request.data}")
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
+            
+            logger.info(f"Successfully created bookmark: {serializer.data}")
             return Response(
-                serializer.data, 
-                status=status.HTTP_201_CREATED, 
+                serializer.data,
+                status=status.HTTP_201_CREATED,
                 headers=headers
             )
-        except Exception as e:
+        except IntegrityError as e:
+            logger.error(f"Integrity error creating bookmark: {str(e)}")
+            return Response(
+                {'detail': 'Database integrity error occurred'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValidationError as e:
+            logger.error(f"Validation error creating bookmark: {str(e)}")
             return Response(
                 {'detail': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error creating bookmark: {str(e)}")
+            return Response(
+                {'detail': 'An unexpected error occurred'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     def perform_create(self, serializer):
@@ -63,28 +84,38 @@ class BookmarkList(generics.ListCreateAPIView):
 
 class BookmarksInFolder(generics.ListAPIView):
     """
-    Fetch bookmarks inside a specific folder by folder ID.
-    Allows users to view all bookmarks within a particular folder.
-    Includes full post data for each bookmark.
+    Fetch bookmarks inside a specific folder by folder ID
     """
     serializer_class = BookmarkSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """
-        Filter bookmarks to only show those in the specified folder
-        and owned by the current user.
-        Uses select_related to efficiently fetch related post data.
+        Filter bookmarks by folder and owner
+        Includes error handling for folder retrieval
         """
-        folder_id = self.kwargs.get('folder_id')
-        return Bookmark.objects.select_related(
-            'post',
-            'owner',
-            'folder'
-        ).filter(
-            folder_id=folder_id,
-            owner=self.request.user
-        )
+        try:
+            folder_id = self.kwargs.get('folder_id')
+            return Bookmark.objects.filter(
+                folder_id=folder_id,
+                owner=self.request.user
+            ).select_related('post', 'folder')
+        except Exception as e:
+            logger.error(f"Error fetching bookmarks: {str(e)}")
+            return Bookmark.objects.none()
+
+    def list(self, request, *args, **kwargs):
+        """
+        Override list method to add error handling
+        """
+        try:
+            return super().list(request, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"Error listing bookmarks: {str(e)}")
+            return Response(
+                {'detail': 'Error retrieving bookmarks'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class BookmarkDetail(generics.RetrieveDestroyAPIView):
     """
@@ -94,4 +125,3 @@ class BookmarkDetail(generics.RetrieveDestroyAPIView):
     permission_classes = [IsOwnerOrReadOnly]
     serializer_class = BookmarkSerializer
     queryset = Bookmark.objects.all()
-
