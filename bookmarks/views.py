@@ -96,20 +96,30 @@ class BookmarksInFolder(generics.ListAPIView):
         """
         try:
             folder_id = self.kwargs.get('folder_id')
-            return Bookmark.objects.filter(
+            return Bookmark.objects.select_related(
+                'post',
+                'post__owner',
+                'folder'
+            ).filter(
                 folder_id=folder_id,
                 owner=self.request.user
-            ).select_related('post', 'folder')
+            ).order_by('-created_at')
         except Exception as e:
             logger.error(f"Error fetching bookmarks: {str(e)}")
             return Bookmark.objects.none()
 
     def list(self, request, *args, **kwargs):
         """
-        Override list method to add error handling
+        Override list method to add error handling and logging
         """
         try:
-            return super().list(request, *args, **kwargs)
+            queryset = self.get_queryset()
+            logger.info(f"Fetched bookmarks: {queryset.count()}")
+            for bookmark in queryset:
+                logger.info(f"Bookmark {bookmark.id}: Post {bookmark.post.id} - {bookmark.post.title}")
+            
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
         except Exception as e:
             logger.error(f"Error listing bookmarks: {str(e)}")
             return Response(
