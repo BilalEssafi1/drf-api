@@ -92,36 +92,28 @@ class BookmarksInFolder(generics.ListAPIView):
     def get_queryset(self):
         """
         Filter bookmarks by folder and owner
-        Includes error handling for folder retrieval
         """
-        try:
-            folder_id = self.kwargs.get('folder_id')
-            return Bookmark.objects.select_related(
-                'post',
-                'post__owner',
-                'folder'
-            ).filter(
-                folder_id=folder_id,
-                owner=self.request.user
-            ).order_by('-created_at')
-        except Exception as e:
-            logger.error(f"Error fetching bookmarks: {str(e)}")
-            return Bookmark.objects.none()
+        folder_id = self.kwargs.get('folder_id')
+        return Bookmark.objects.select_related(
+            'post',
+            'post__owner',
+            'folder'
+        ).filter(
+            folder_id=folder_id,
+            owner=self.request.user
+        ).order_by('-created_at')
 
     def list(self, request, *args, **kwargs):
         """
-        Override list method to add error handling and logging
+        Override list method to structure response properly
         """
         try:
             queryset = self.get_queryset()
-            logger.info(f"Fetched bookmarks: {queryset.count()}")
-            for bookmark in queryset:
-                logger.info(f"Bookmark {bookmark.id}: Post {bookmark.post.id} - {bookmark.post.title}")
-            
             serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data)
+            return Response({
+                "results": serializer.data
+            })
         except Exception as e:
-            logger.error(f"Error listing bookmarks: {str(e)}")
             return Response(
                 {'detail': 'Error retrieving bookmarks'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
