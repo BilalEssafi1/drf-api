@@ -90,4 +90,3 @@ class BookmarkSerializer(serializers.ModelSerializer):
                 })
 
         return data
-
