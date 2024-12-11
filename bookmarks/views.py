@@ -63,17 +63,26 @@ class BookmarkList(generics.ListCreateAPIView):
 
 class BookmarksInFolder(generics.ListAPIView):
     """
-    Fetch bookmarks inside a specific folder by folder ID
-    Allows users to view all bookmarks within a particular folder
+    Fetch bookmarks inside a specific folder by folder ID.
+    Allows users to view all bookmarks within a particular folder.
+    Includes full post data for each bookmark.
     """
     serializer_class = BookmarkSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """Filter bookmarks by folder ID and current user"""
+        """
+        Filter bookmarks to only show those in the specified folder
+        and owned by the current user.
+        Uses select_related to efficiently fetch related post data.
+        """
         folder_id = self.kwargs.get('folder_id')
-        return Bookmark.objects.filter(
-            folder_id=folder_id, 
+        return Bookmark.objects.select_related(
+            'post',
+            'owner',
+            'folder'
+        ).filter(
+            folder_id=folder_id,
             owner=self.request.user
         )
 
@@ -85,4 +94,4 @@ class BookmarkDetail(generics.RetrieveDestroyAPIView):
     permission_classes = [IsOwnerOrReadOnly]
     serializer_class = BookmarkSerializer
     queryset = Bookmark.objects.all()
-    
+

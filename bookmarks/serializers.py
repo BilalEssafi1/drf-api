@@ -15,35 +15,29 @@ class BookmarkFolderSerializer(serializers.ModelSerializer):
 
 class BookmarkSerializer(serializers.ModelSerializer):
     """
-    Serializer for bookmarks
-    Handles creation and validation of bookmarks
-    
-    Fields:
-    - owner: Username of bookmark creator (read-only)
-    - post_title: Title of bookmarked post (read-only)
-    - folder_name: Name of containing folder (read-only)
+    Serializer for bookmarks. Provides comprehensive post and folder details.
     """
     owner = serializers.ReadOnlyField(source='owner.username')
     post_title = serializers.ReadOnlyField(source='post.title')
+    post_content = serializers.ReadOnlyField(source='post.content')
+    post_image = serializers.ReadOnlyField(source='post.image')
+    post_owner = serializers.ReadOnlyField(source='post.owner.username')
     folder_name = serializers.ReadOnlyField(source='folder.name')
 
     class Meta:
         model = Bookmark
         fields = [
-            'id', 'owner', 'post', 'post_title', 
-            'folder', 'folder_name', 'created_at'
+            'id', 'owner', 
+            'post', 'post_title', 'post_content', 'post_image', 'post_owner',
+            'folder', 'folder_name', 
+            'created_at'
         ]
         read_only_fields = ['owner']
 
     def validate(self, data):
         """
         Validate the bookmark data
-        
-        Checks:
-        1. Required fields are present
-        2. No duplicate bookmarks exist for the same post/folder combination
         """
-        # Validate required fields
         if not data.get('post'):
             raise serializers.ValidationError({
                 'post': 'This field is required.'
