@@ -6,6 +6,7 @@ from django.dispatch import receiver
 
 # Create your models here.
 
+
 class Profile(models.Model):
     owner = models.OneToOneField(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -13,10 +14,10 @@ class Profile(models.Model):
     name = models.CharField(max_length=255, blank=True)
     content = models.TextField(blank=True)
     image = models.ImageField(
-        upload_to='profiles/', 
-        blank=True, null=True, 
+        upload_to='profiles/',
+        blank=True, null=True,
         default='green-apple_iubz3m',
-        storage=MediaCloudinaryStorage()) 
+        storage=MediaCloudinaryStorage())
 
     class Meta:
         ordering = ['-created_at']
@@ -30,4 +31,4 @@ def create_profile(sender, instance, created, **kwargs):
         Profile.objects.create(owner=instance)
 
 
-post_save.connect(create_profile, sender=User) 
+post_save.connect(create_profile, sender=User)

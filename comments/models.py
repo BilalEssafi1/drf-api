@@ -4,6 +4,7 @@ from posts.models import Post
 
 # Create your models here.
 
+
 class Comment(models.Model):
     """
     Comment model, related to User and Post

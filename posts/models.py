@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from cloudinary_storage.storage import MediaCloudinaryStorage
 from django.contrib.auth.models import User
 
+
 class Tag(models.Model):
     """
     Tag model to categorize posts into sustainability-related topics.
@@ -17,7 +18,8 @@ class Tag(models.Model):
 class Post(models.Model):
     """
     Post model for user-generated content.
-    Includes tags for categorization, a shareable URL, and an image (with default).
+    Includes tags for categorization, a shareable URL,
+    and an image (with default).
     """
     title = models.CharField(max_length=255)
     content = models.TextField(blank=True)
@@ -25,10 +27,10 @@ class Post(models.Model):
     tags = models.ManyToManyField(Tag, related_name='posts', blank=True)
     shareable_url = models.URLField(blank=True)
     image = models.ImageField(
-        upload_to='posts/', 
-        blank=True, null=True, 
+        upload_to='posts/',
+        blank=True, null=True,
         default='green-apple_iubz3m',
-        storage=MediaCloudinaryStorage()) 
+        storage=MediaCloudinaryStorage())
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

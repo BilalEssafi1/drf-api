@@ -6,6 +6,7 @@ from likes.serializers import LikeSerializer
 
 # Create your views here.
 
+
 class LikeList(generics.ListCreateAPIView):
     """
     List likes or create a like if logged in.

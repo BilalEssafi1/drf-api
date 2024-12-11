@@ -6,6 +6,7 @@ from .serializers import FollowerSerializer
 
 # Create your views here.
 
+
 class FollowerList(generics.ListCreateAPIView):
     """
     List all followers, i.e. all instances of a user

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from posts.models import Post
 
+
 class BookmarkFolder(models.Model):
     """
     Folder model to organize bookmarked posts
@@ -19,11 +20,12 @@ class BookmarkFolder(models.Model):
     def __str__(self):
         return f"{self.owner}'s folder: {self.name}"
 
+
 class Bookmark(models.Model):
     """
     Bookmark model for saving posts
     Allows users to save posts into specific folders
-    
+
     Fields:
     - owner: The user who created the bookmark
     - post: The post being bookmarked
@@ -31,19 +33,19 @@ class Bookmark(models.Model):
     - created_at: Timestamp of bookmark creation
     """
     owner = models.ForeignKey(
-        User, 
+        User,
         on_delete=models.CASCADE,
         help_text="User who created the bookmark"
     )
     post = models.ForeignKey(
-        Post, 
-        related_name='bookmarks', 
+        Post,
+        related_name='bookmarks',
         on_delete=models.CASCADE,
         help_text="Post being bookmarked"
     )
     folder = models.ForeignKey(
-        BookmarkFolder, 
-        related_name='bookmarks', 
+        BookmarkFolder,
+        related_name='bookmarks',
         on_delete=models.CASCADE,
         help_text="Folder containing the bookmark"
     )
@@ -58,7 +60,9 @@ class Bookmark(models.Model):
             models.UniqueConstraint(
                 fields=['owner', 'post', 'folder'],
                 name='unique_bookmark',
-                violation_error_message="This post is already bookmarked in this folder."
+                violation_error_message=(
+                    "This post is already bookmarked in this folder."
+                )
             )
         ]
 

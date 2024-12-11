@@ -4,6 +4,7 @@ from posts.models import Post
 
 # Create your models here.
 
+
 class Like(models.Model):
     """
     Like model, related to 'owner' and 'post'.

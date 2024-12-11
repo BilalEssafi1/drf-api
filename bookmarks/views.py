@@ -11,6 +11,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class BookmarkFolderList(generics.ListCreateAPIView):
     """
     Lists all bookmark folders for the authenticated user
@@ -28,6 +29,7 @@ class BookmarkFolderList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         """Create new folder with current user as owner"""
         serializer.save(owner=self.request.user)
+
 
 class BookmarkList(generics.ListCreateAPIView):
     """
@@ -49,10 +51,10 @@ class BookmarkList(generics.ListCreateAPIView):
             logger.info(f"Creating bookmark with data: {request.data}")
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            
+
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
-            
+
             logger.info(f"Successfully created bookmark: {serializer.data}")
             return Response(
                 serializer.data,
@@ -81,6 +83,7 @@ class BookmarkList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         """Set the owner during bookmark creation"""
         serializer.save(owner=self.request.user)
+
 
 class BookmarksInFolder(generics.ListAPIView):
     """
@@ -118,6 +121,7 @@ class BookmarksInFolder(generics.ListAPIView):
                 {'detail': 'Error retrieving bookmarks'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 class BookmarkDetail(generics.RetrieveDestroyAPIView):
     """
