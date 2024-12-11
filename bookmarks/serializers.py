@@ -3,7 +3,8 @@ from .models import BookmarkFolder, Bookmark
 
 class BookmarkFolderSerializer(serializers.ModelSerializer):
     """
-    Serializer for bookmark folders. Includes count of bookmarks in each folder.
+    Serializer for bookmark folders
+    Includes count of bookmarks in each folder
     """
     owner = serializers.ReadOnlyField(source='owner.username')
     bookmarks_count = serializers.ReadOnlyField()
@@ -14,8 +15,13 @@ class BookmarkFolderSerializer(serializers.ModelSerializer):
 
 class BookmarkSerializer(serializers.ModelSerializer):
     """
-    Serializer for the Bookmark model
+    Serializer for bookmarks
     Handles creation and validation of bookmarks
+    
+    Fields:
+    - owner: Username of bookmark creator (read-only)
+    - post_title: Title of bookmarked post (read-only)
+    - folder_name: Name of containing folder (read-only)
     """
     owner = serializers.ReadOnlyField(source='owner.username')
     post_title = serializers.ReadOnlyField(source='post.title')
@@ -27,19 +33,17 @@ class BookmarkSerializer(serializers.ModelSerializer):
             'id', 'owner', 'post', 'post_title', 
             'folder', 'folder_name', 'created_at'
         ]
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=Bookmark.objects.all(),
-                fields=['owner', 'post', 'folder'],
-                message="You have already bookmarked this post in this folder."
-            )
-        ]
+        read_only_fields = ['owner']
 
     def validate(self, data):
         """
-        Validates that both post and folder are provided
-        Also ensures the owner field is not directly set through the API
+        Validate the bookmark data
+        
+        Checks:
+        1. Required fields are present
+        2. No duplicate bookmarks exist for the same post/folder combination
         """
+        # Validate required fields
         if not data.get('post'):
             raise serializers.ValidationError({
                 'post': 'This field is required.'
@@ -48,21 +52,18 @@ class BookmarkSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'folder': 'This field is required.'
             })
-        
-        # Remove owner if it's in the data to prevent owner field errors
-        data.pop('owner', None)
-        return data
 
-    def create(self, validated_data):
-        """
-        Creates and returns a new Bookmark instance
-        Sets the owner from the context before creating
-        """
-        try:
-            # Ensure owner is set from the context
-            validated_data['owner'] = self.context['request'].user
-            return super().create(validated_data)
-        except Exception as e:
-            raise serializers.ValidationError({
-                'detail': f'Error creating bookmark: {str(e)}'
-            })
+        # Check for duplicate bookmarks
+        request = self.context.get('request')
+        if request and request.user:
+            existing = Bookmark.objects.filter(
+                owner=request.user,
+                post=data.get('post'),
+                folder=data.get('folder')
+            ).exists()
+            if existing:
+                raise serializers.ValidationError(
+                    "You have already bookmarked this post in this folder."
+                )
+
+        return data
