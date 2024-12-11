@@ -55,6 +55,25 @@ class BookmarkList(generics.ListCreateAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+class BookmarksInFolder(generics.ListAPIView):
+    """
+    Fetch bookmarks inside a specific folder by folder ID.
+    Allows users to view all bookmarks within a particular folder.
+    """
+    serializer_class = BookmarkSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Filter bookmarks to only show those in the specified folder
+        and owned by the current user
+        """
+        folder_id = self.kwargs.get('folder_id')
+        return Bookmark.objects.filter(
+            folder_id=folder_id, 
+            owner=self.request.user
+        )
+
 class BookmarkDetail(generics.RetrieveDestroyAPIView):
     """
     Retrieve or delete a specific bookmark by ID.
