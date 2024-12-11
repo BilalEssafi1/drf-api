@@ -38,22 +38,29 @@ class BookmarkList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         """
         Create a new bookmark
+        Includes enhanced error handling and proper owner assignment
         """
         try:
-            # Attempt to save the bookmark
             serializer.save(owner=self.request.user)
         except ValidationError as e:
-            # Handle validation errors
             return Response(
                 {'detail': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
-            # Handle other errors
             return Response(
                 {'detail': f'An error occurred: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    def get_serializer_context(self):
+        """
+        Add request to serializer context
+        This ensures the serializer has access to the current user
+        """
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 class BookmarksInFolder(generics.ListAPIView):
     """

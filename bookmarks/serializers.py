@@ -27,7 +27,6 @@ class BookmarkSerializer(serializers.ModelSerializer):
             'id', 'owner', 'post', 'post_title', 
             'folder', 'folder_name', 'created_at'
         ]
-        # NEW: Added validator to prevent duplicate bookmarks
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=Bookmark.objects.all(),
@@ -39,6 +38,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """
         Validates that both post and folder are provided
+        Also ensures the owner field is not directly set through the API
         """
         if not data.get('post'):
             raise serializers.ValidationError({
@@ -48,14 +48,19 @@ class BookmarkSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'folder': 'This field is required.'
             })
+        
+        # Remove owner if it's in the data to prevent owner field errors
+        data.pop('owner', None)
         return data
 
     def create(self, validated_data):
         """
         Creates and returns a new Bookmark instance
-        Includes additional validation
+        Sets the owner from the context before creating
         """
         try:
+            # Ensure owner is set from the context
+            validated_data['owner'] = self.context['request'].user
             return super().create(validated_data)
         except Exception as e:
             raise serializers.ValidationError({
