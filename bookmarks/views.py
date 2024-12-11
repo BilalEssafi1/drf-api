@@ -1,11 +1,11 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions
-from django.db.models import Count
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from django.db.models import Count
+from django.core.exceptions import ValidationError
 from .models import BookmarkFolder, Bookmark
 from .serializers import BookmarkFolderSerializer, BookmarkSerializer
 from drf_api.permissions import IsOwnerOrReadOnly
-
 
 class BookmarkFolderList(generics.ListCreateAPIView):
     """
@@ -22,41 +22,6 @@ class BookmarkFolderList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-
-class BookmarkFolderDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    Retrieve, update, or delete a folder.
-    Includes bookmarks inside the folder in GET responses.
-    """
-    permission_classes = [IsOwnerOrReadOnly]
-    serializer_class = BookmarkFolderSerializer
-    queryset = BookmarkFolder.objects.annotate(
-        bookmarks_count=Count('bookmarks')
-    )
-
-    def get(self, request, *args, **kwargs):
-        # Fetch folder and its bookmarks
-        folder = self.get_object()
-        bookmarks = folder.bookmarks.all()  # Use related_name for easy reverse lookup
-        data = {
-            'folder': BookmarkFolderSerializer(folder).data,
-            'bookmarks': BookmarkSerializer(bookmarks, many=True).data
-        }
-        return Response(data)
-
-
-class BookmarksInFolder(generics.ListAPIView):
-    """
-    Fetch bookmarks inside a specific folder by folder ID.
-    """
-    serializer_class = BookmarkSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        folder_id = self.kwargs.get('folder_id')
-        return Bookmark.objects.filter(folder_id=folder_id, owner=self.request.user)
-
-
 class BookmarkList(generics.ListCreateAPIView):
     """
     Lists all bookmarks for the authenticated user and allows new bookmark creation.
@@ -65,11 +30,30 @@ class BookmarkList(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Filter bookmarks to show only those owned by the current user
+        """
         return Bookmark.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
-
+        """
+        Create a new bookmark
+        """
+        try:
+            # Attempt to save the bookmark
+            serializer.save(owner=self.request.user)
+        except ValidationError as e:
+            # Handle validation errors
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            # Handle other errors
+            return Response(
+                {'detail': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class BookmarkDetail(generics.RetrieveDestroyAPIView):
     """
