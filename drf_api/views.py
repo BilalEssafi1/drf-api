@@ -35,4 +35,26 @@ def logout_route(request):
        samesite=JWT_AUTH_SAMESITE,
        secure=JWT_AUTH_SECURE,
    )
+    # Clear the csrftoken and sessionid cookies
+   response.set_cookie(
+       key='csrftoken',
+       value='',
+       httponly=False,
+       expires='Thu, 01 Jan 1970 00:00:00 GMT',
+       max_age=0,
+       samesite='None',
+       secure=True,
+       path='/'
+   )
+   response.set_cookie(
+       key='sessionid',
+       value='',
+       httponly=False,
+       expires='Thu, 01 Jan 1970 00:00:00 GMT',
+       max_age=0,
+       samesite='None',
+       secure=True,
+       path='/'
+   )
+
    return response
