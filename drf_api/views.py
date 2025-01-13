@@ -22,17 +22,9 @@ def logout_route(request):
     response = Response({"message": "Logout successful"})
     
     # Clear authentication cookies
+    response = Response({'message': 'Logged out successfully'})
     response.delete_cookie('my-app-auth', samesite='None', secure=True)
     response.delete_cookie('my-refresh-token', samesite='None', secure=True)
     response.delete_cookie('csrftoken', samesite='None', secure=True)
-    
-    # Set a new CSRF token
-    response.set_cookie(
-        key="csrftoken",
-        value="new-token-placeholder",
-        httponly=False,
-        samesite='None',
-        secure=True,
-    )
     
     return response
