@@ -13,26 +13,26 @@ def root_route(request):
     })
 
 
-# dj-rest-auth logout view fix
+# Updated dj-rest-auth logout view fix
 @api_view(['POST'])
 def logout_route(request):
-    response = Response()
+    """
+    Custom logout view to clear authentication cookies and regenerate CSRF token.
+    """
+    response = Response({"message": "Logout successful"})
+    
+    # Clear authentication cookies
+    response.delete_cookie('my-app-auth', samesite='None', secure=True)
+    response.delete_cookie('my-refresh-token', samesite='None', secure=True)
+    response.delete_cookie('csrftoken', samesite='None', secure=True)
+    
+    # Set a new CSRF token
     response.set_cookie(
-        key=JWT_AUTH_COOKIE,
-        value='',
-        httponly=True,
-        expires='Thu, 01 Jan 1970 00:00:00 GMT',
-        max_age=0,
-        samesite=JWT_AUTH_SAMESITE,
-        secure=JWT_AUTH_SECURE,
+        key="csrftoken",
+        value="new-token-placeholder",
+        httponly=False,
+        samesite='None',
+        secure=True,
     )
-    response.set_cookie(
-        key=JWT_AUTH_REFRESH_COOKIE,
-        value='',
-        httponly=True,
-        expires='Thu, 01 Jan 1970 00:00:00 GMT',
-        max_age=0,
-        samesite=JWT_AUTH_SAMESITE,
-        secure=JWT_AUTH_SECURE,
-    )
+    
     return response
