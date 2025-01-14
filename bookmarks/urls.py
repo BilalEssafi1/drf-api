@@ -3,6 +3,7 @@ from bookmarks import views
 
 urlpatterns = [
     path('folders/', views.BookmarkFolderList.as_view()),
+    path('folders/<int:pk>/', views.BookmarkFolderDetail.as_view()),
     path(
         'folders/<int:folder_id>/bookmarks/',
         views.BookmarksInFolder.as_view()

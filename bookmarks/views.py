@@ -31,6 +31,23 @@ class BookmarkFolderList(generics.ListCreateAPIView):
         serializer.save(owner=self.request.user)
 
 
+class BookmarkFolderDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, or delete a specific bookmark folder
+    Only allows owners to modify their folders
+    """
+    permission_classes = [IsOwnerOrReadOnly]
+    serializer_class = BookmarkFolderSerializer
+    queryset = BookmarkFolder.objects.all()
+
+    def perform_update(self, serializer):
+        """Ensure folder names remain unique per user"""
+        try:
+            serializer.save()
+        except IntegrityError:
+            raise ValidationError({"detail": "A folder with this name exists alreadya"})
+
+
 class BookmarkList(generics.ListCreateAPIView):
     """
     Lists all bookmarks for the authenticated user
