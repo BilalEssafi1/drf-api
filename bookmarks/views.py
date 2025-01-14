@@ -47,37 +47,25 @@ class BookmarkList(generics.ListCreateAPIView):
         """
         Override create method to handle bookmark creation with error handling
         """
+        serializer = self.get_serializer(data=request.data)
         try:
-            logger.info(f"Creating bookmark with data: {request.data}")
-            serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
-
-            logger.info(f"Successfully created bookmark: {serializer.data}")
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED,
                 headers=headers
             )
-        except IntegrityError as e:
-            logger.error(f"Integrity error creating bookmark: {str(e)}")
-            return Response(
-                {'detail': 'Database integrity error occurred'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         except ValidationError as e:
-            logger.error(f"Validation error creating bookmark: {str(e)}")
             return Response(
                 {'detail': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
-            logger.error(f"Unexpected error creating bookmark: {str(e)}")
             return Response(
-                {'detail': 'An unexpected error occurred'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'detail': "You have already bookmarked this post in this folder."},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
     def perform_create(self, serializer):
