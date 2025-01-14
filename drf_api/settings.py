@@ -130,6 +130,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://127.0.0.1:8000',
     'https://ecosphere-social-8d56a42d0db7.herokuapp.com',
     'https://3000-bilalessafi1-ecosphere-h5z3fswcj34.ws.codeinstitute-ide.net',
+    'https://drf-api-green-social-61be33473742.herokuapp.com',
 ]
 
 MIDDLEWARE = [
@@ -146,6 +147,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     'https://ecosphere-social-8d56a42d0db7.herokuapp.com',
     'http://localhost:3000',
+    'https://drf-api-green-social-61be33473742.herokuapp.com',
 ]
 
 if 'CLIENT_ORIGIN_DEV' in os.environ:
