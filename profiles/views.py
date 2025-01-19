@@ -38,7 +38,7 @@ class ProfileList(generics.ListAPIView):
 
 class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    Retrieve, update, or delete a profile if you're the owner.
+    Retrieve, update or delete a profile if you're the owner.
     """
     permission_classes = [IsOwnerOrReadOnly]
     queryset = Profile.objects.annotate(
@@ -47,3 +47,17 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
         following_count=Count('owner__following', distinct=True)
     ).order_by('-created_at')
     serializer_class = ProfileSerializer
+
+    def perform_destroy(self, instance):
+        """
+        Custom destroy method to delete both profile and associated user
+        """
+        try:
+            # Get the user before deleting the profile
+            user = instance.owner
+            # Delete the profile
+            instance.delete()
+            # Delete the associated user account
+            user.delete()
+        except Exception as e:
+            raise ValidationError({"detail": "Error deleting account. Please try again."})
