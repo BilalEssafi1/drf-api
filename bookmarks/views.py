@@ -28,7 +28,10 @@ class BookmarkFolderList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         """Create new folder with current user as owner"""
-        serializer.save(owner=self.request.user)
+        try:
+            serializer.save(owner=self.request.user)
+        except IntegrityError:
+            raise ValidationError({"detail": "A folder with this name already exists"})
 
 
 class BookmarkFolderDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -38,14 +41,29 @@ class BookmarkFolderDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     permission_classes = [IsOwnerOrReadOnly]
     serializer_class = BookmarkFolderSerializer
-    queryset = BookmarkFolder.objects.all()
 
-    def perform_update(self, serializer):
-        """Ensure folder names remain unique per user"""
+    def get_queryset(self):
+        """Ensure users can only access their own folders"""
+        return BookmarkFolder.objects.filter(owner=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        """Handle folder updates with duplicate name checking"""
         try:
-            serializer.save()
+            response = super().update(request, *args, **kwargs)
+            return response
         except IntegrityError:
-            raise ValidationError({"detail": "A folder with this name exists alreadya"})
+            raise ValidationError({"detail": "A folder with this name already exists"})
+
+    def perform_destroy(self, instance):
+        """Custom destroy method to handle folder deletion"""
+        try:
+            # Delete all bookmarks in the folder first
+            instance.bookmarks.all().delete()
+            # Then delete the folder
+            instance.delete()
+        except Exception as e:
+            logger.error(f"Error deleting folder: {str(e)}")
+            raise ValidationError({"detail": "Error deleting folder and its contents"})
 
 
 class BookmarkList(generics.ListCreateAPIView):
@@ -122,6 +140,7 @@ class BookmarksInFolder(generics.ListAPIView):
                 "results": serializer.data
             })
         except Exception as e:
+            logger.error(f"Error retrieving bookmarks: {str(e)}")
             return Response(
                 {'detail': 'Error retrieving bookmarks'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -135,4 +154,15 @@ class BookmarkDetail(generics.RetrieveDestroyAPIView):
     """
     permission_classes = [IsOwnerOrReadOnly]
     serializer_class = BookmarkSerializer
-    queryset = Bookmark.objects.all()
+
+    def get_queryset(self):
+        """Ensure users can only access their own bookmarks"""
+        return Bookmark.objects.filter(owner=self.request.user)
+
+    def perform_destroy(self, instance):
+        """Custom destroy method to handle bookmark deletion"""
+        try:
+            instance.delete()
+        except Exception as e:
+            logger.error(f"Error deleting bookmark: {str(e)}")
+            raise ValidationError({"detail": "Error deleting bookmark"})
