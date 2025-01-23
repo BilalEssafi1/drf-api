@@ -53,16 +53,13 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     ).order_by('-created_at')
     serializer_class = ProfileSerializer
 
-    def perform_destroy(self, instance):
-        """
-        Custom destroy method to delete both profile and associated user
-        """
+    def destroy(self, request, *args, **kwargs):
         try:
-            # Get the user before deleting the profile
+            instance = self.get_object()
             user = instance.owner
-            # Delete the profile
+            
+            # Delete profile and user
             instance.delete()
-            # Delete the associated user account
             user.delete()
             
             # Create response with cookie cleanup
@@ -102,7 +99,7 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
                     path='/'
                 )
 
-            rotate_token(self.request)
+            rotate_token(request)
             return response
             
         except Exception as e:
