@@ -35,6 +35,12 @@ class BookmarkFolderList(generics.ListCreateAPIView):
                 {"detail": "A folder with this name already exists"},
                 code=status.HTTP_400_BAD_REQUEST
             )
+        except Exception as e:
+            logger.error(f"Error creating folder: {str(e)}")
+            raise ValidationError(
+                {"detail": "Error creating folder"},
+                code=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class BookmarkFolderDetail(generics.RetrieveUpdateDestroyAPIView):
