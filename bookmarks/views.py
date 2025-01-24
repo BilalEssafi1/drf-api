@@ -31,7 +31,10 @@ class BookmarkFolderList(generics.ListCreateAPIView):
         try:
             serializer.save(owner=self.request.user)
         except IntegrityError:
-            raise ValidationError({"detail": "A folder with this name already exists"})
+            raise ValidationError(
+                {"detail": "A folder with this name already exists"},
+                code=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class BookmarkFolderDetail(generics.RetrieveUpdateDestroyAPIView):
