@@ -149,6 +149,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'https://ecosphere-social-8d56a42d0db7.herokuapp.com',
     'http://localhost:3000',
