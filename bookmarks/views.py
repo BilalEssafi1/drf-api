@@ -30,16 +30,11 @@ class BookmarkFolderList(generics.ListCreateAPIView):
         """Create new folder with current user as owner"""
         try:
             serializer.save(owner=self.request.user)
-        except IntegrityError:
-            raise ValidationError(
+        except IntegrityError as e:
+            logger.error(f"IntegrityError creating folder: {str(e)}")
+            return Response(
                 {"detail": "A folder with this name already exists"},
-                code=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception as e:
-            logger.error(f"Error creating folder: {str(e)}")
-            raise ValidationError(
-                {"detail": "Error creating folder"},
-                code=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 
