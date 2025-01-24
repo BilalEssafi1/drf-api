@@ -17,7 +17,7 @@ class CustomRegisterView(RegisterView):
         headers = self.get_success_headers(serializer.data)
         
         response = Response(
-            {'detail': 'Registered successfully'},
+            {'detail': 'Registered successfully', 'redirect': '/signin'},
             status=status.HTTP_201_CREATED,
             headers=headers
         )
