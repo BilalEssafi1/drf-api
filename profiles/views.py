@@ -8,7 +8,9 @@ from .models import Profile
 from .serializers import ProfileSerializer
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from drf_api.utils import clear_auth_cookies
 
+# JWT settings from Django configuration
 JWT_AUTH_COOKIE = getattr(settings, 'JWT_AUTH_COOKIE', None)
 JWT_AUTH_REFRESH_COOKIE = getattr(settings, 'JWT_AUTH_REFRESH_COOKIE', None)
 JWT_AUTH_SAMESITE = getattr(settings, 'JWT_AUTH_SAMESITE', 'None')
@@ -54,19 +56,33 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProfileSerializer
 
     def destroy(self, request, *args, **kwargs):
+        """
+        Custom destroy method to handle user account deletion
+        Cleans up auth cookies and rotates CSRF token after deletion
+        """
         try:
+            # Get the profile instance and associated user
             instance = self.get_object()
             user = instance.owner
-        
-            # Delete profile and user
+            
+            # Delete both profile and user
             instance.delete()
             user.delete()
-        
-            # Create response with unified cookie cleanup
+            
+            # Create response with proper status
             response = Response(status=status.HTTP_204_NO_CONTENT)
+            
+            # Clear all authentication cookies using utility
             response = clear_auth_cookies(response)
+            
+            # Rotate CSRF token for security
             rotate_token(request)
+            
             return response
-        
+            
         except Exception as e:
-            raise ValidationError({"detail": "Error deleting account. Please try again."})
+            # Log the error (consider adding proper logging)
+            print(f"Error deleting account: {str(e)}")
+            raise ValidationError({
+                "detail": "Error deleting account. Please try again."
+            })
