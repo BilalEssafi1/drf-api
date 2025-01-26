@@ -33,14 +33,17 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Enhanced Cookie Settings
-CSRF_COOKIE_SAMESITE = 'None'  # Allow CSRF cookies in cross-site context
-CSRF_COOKIE_SECURE = True      # Only send over HTTPS
-CSRF_COOKIE_HTTPONLY = True    # Prevent JavaScript access
-SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_DOMAIN = '.herokuapp.com'
+CSRF_COOKIE_DOMAIN = '.herokuapp.com'
+CSRF_COOKIE_SAMESITE = 'Lax'  
+CSRF_COOKIE_SECURE = True    
+CSRF_COOKIE_HTTPONLY = True  
+SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 3600
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 
 # Rest Framework Configuration
 REST_FRAMEWORK = {
@@ -61,14 +64,14 @@ if 'DEV' not in os.environ:
 
 # Enhanced JWT Settings
 REST_USE_JWT = True
-JWT_AUTH_SAMESITE = 'None'
+JWT_AUTH_SAMESITE = 'Lax'
 JWT_AUTH_SECURE = True
 JWT_AUTH_COOKIE = 'my-app-auth'
 JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
 JWT_AUTH_COOKIE_SECURE = True
 JWT_AUTH_REFRESH_COOKIE_SECURE = True
-JWT_AUTH_COOKIE_SAMESITE = 'None'
-JWT_AUTH_REFRESH_COOKIE_SAMESITE = 'None'
+JWT_AUTH_COOKIE_SAMESITE = 'Lax'
+JWT_AUTH_REFRESH_COOKIE_SAMESITE = 'Lax'
 JWT_AUTH_COOKIE_HTTPONLY = True
 JWT_AUTH_REFRESH_COOKIE_HTTPONLY = True
 JWT_AUTH_COOKIE_PATH = '/'
