@@ -33,8 +33,6 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Enhanced Cookie Settings
-SESSION_COOKIE_DOMAIN = '.herokuapp.com'
-CSRF_COOKIE_DOMAIN = '.herokuapp.com'
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
