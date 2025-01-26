@@ -32,15 +32,23 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Enhanced Cookie Settings
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 3600
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 # Rest Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication'
     ],
-    'DEFAULT_PAGINATION_CLASS': (
-        'rest_framework.pagination.PageNumberPagination'
-    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'DATETIME_FORMAT': '%d %b %Y',
 }
@@ -53,41 +61,31 @@ if 'DEV' not in os.environ:
 
 # Enhanced JWT Settings
 REST_USE_JWT = True
-JWT_AUTH_SAMESITE = 'Lax'
+JWT_AUTH_SAMESITE = 'None'
 JWT_AUTH_SECURE = True
 JWT_AUTH_COOKIE = 'my-app-auth'
 JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
 JWT_AUTH_COOKIE_SECURE = True
 JWT_AUTH_REFRESH_COOKIE_SECURE = True
-JWT_AUTH_COOKIE_SAMESITE = 'Lax'
-JWT_AUTH_REFRESH_COOKIE_SAMESITE = 'Lax'
+JWT_AUTH_COOKIE_SAMESITE = 'None'
+JWT_AUTH_REFRESH_COOKIE_SAMESITE = 'None'
+JWT_AUTH_COOKIE_HTTPONLY = True
+JWT_AUTH_REFRESH_COOKIE_HTTPONLY = True
 JWT_AUTH_COOKIE_PATH = '/'
 JWT_AUTH_REFRESH_COOKIE_PATH = '/'
 
-# Explicit session and CSRF cookie domain for cross-domain compatibility
-SESSION_COOKIE_DOMAIN = '.herokuapp.com'
-CSRF_COOKIE_DOMAIN = '.herokuapp.com'
-
-# Session settings
+# Session configuration
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_HTTPONLY = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# CSRF settings
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'Lax'  # Updated for cross-site compatibility
-CSRF_COOKIE_HTTPONLY = True
+REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'drf_api.serializers.CurrentUserSerializer'
+}
 
-# CORS settings
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'https://ecosphere-social-8d56a42d0db7.herokuapp.com',
-]
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# Proxy and SSL settings
+# Additional security headers
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
 
@@ -141,6 +139,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:8000',
     'https://127.0.0.1:8000',
     'https://ecosphere-social-8d56a42d0db7.herokuapp.com',
+    'https://3000-bilalessafi1-ecosphere-h5z3fswcj34.ws.codeinstitute-ide.net',
     'https://drf-api-green-social-61be33473742.herokuapp.com',
 ]
 
@@ -153,7 +152,24 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'drf_api.middleware.CookieCleanupMiddleware',
 ]
+
+# Enhanced CORS settings
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'https://ecosphere-social-8d56a42d0db7.herokuapp.com',
+    'http://localhost:3000',
+    'https://drf-api-green-social-61be33473742.herokuapp.com',
+]
+
+if 'CLIENT_ORIGIN_DEV' in os.environ:
+    extracted_url = re.match(
+        r'^.+-', os.environ.get('CLIENT_ORIGIN_DEV', ''), re.IGNORECASE
+    ).group(0)
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        rf"{extracted_url}(eu|us)\d+\w\.gitpod\.io$",
+    ]
 
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -174,7 +190,13 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'cache-control',
+    'pragma',
 ]
+
+# Additional CORS settings
+CORS_EXPOSE_HEADERS = ['content-type', 'x-csrftoken']
+CORS_PREFLIGHT_MAX_AGE = 86400
 
 ROOT_URLCONF = 'drf_api.urls'
 
@@ -196,9 +218,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'drf_api.wsgi.application'
 
+# Database
+# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+
 DATABASES = {
     'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
 }
+
+# Password validation
+# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -225,6 +253,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Internationalization
+# https://docs.djangoproject.com/en/3.2/topics/i18n/
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -235,6 +266,12 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/3.2/howto/static-files/
+
 STATIC_URL = '/static/'
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
