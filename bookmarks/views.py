@@ -55,7 +55,9 @@ class BookmarkFolderDetail(generics.RetrieveUpdateDestroyAPIView):
             response = super().update(request, *args, **kwargs)
             return response
         except IntegrityError:
-            raise ValidationError({"detail": "A folder with this name already exists"})
+            raise ValidationError({
+                "detail": "A folder with this name already exists"
+            })
 
     def perform_destroy(self, instance):
         """Custom destroy method to handle folder deletion"""
@@ -66,7 +68,9 @@ class BookmarkFolderDetail(generics.RetrieveUpdateDestroyAPIView):
             instance.delete()
         except Exception as e:
             logger.error(f"Error deleting folder: {str(e)}")
-            raise ValidationError({"detail": "Error deleting folder and its contents"})
+            raise ValidationError({
+                "detail": "Error deleting folder and its contents"
+            })
 
 
 class BookmarkList(generics.ListCreateAPIView):
@@ -102,7 +106,12 @@ class BookmarkList(generics.ListCreateAPIView):
             )
         except Exception as e:
             return Response(
-                {'detail': "You have already bookmarked this post in this folder."},
+                {
+                    'detail': (
+                        "You have already bookmarked this post "
+                        "in this folder."
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST
             )
 

@@ -16,6 +16,7 @@ JWT_AUTH_REFRESH_COOKIE = getattr(settings, 'JWT_AUTH_REFRESH_COOKIE', None)
 JWT_AUTH_SAMESITE = getattr(settings, 'JWT_AUTH_SAMESITE', 'None')
 JWT_AUTH_SECURE = getattr(settings, 'JWT_AUTH_SECURE', True)
 
+
 class ProfileList(generics.ListAPIView):
     """
     List all profiles.
@@ -43,6 +44,7 @@ class ProfileList(generics.ListAPIView):
         'owner__followed__created_at',
     ]
 
+
 class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update or delete a profile if you're the owner.
@@ -64,22 +66,22 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
             # Get the profile instance and associated user
             instance = self.get_object()
             user = instance.owner
-            
+
             # Delete both profile and user
             instance.delete()
             user.delete()
-            
+
             # Create response with proper status
             response = Response(status=status.HTTP_204_NO_CONTENT)
-            
+
             # Clear all authentication cookies using utility
             response = clear_auth_cookies(response)
-            
+
             # Rotate CSRF token for security
             rotate_token(request)
-            
+
             return response
-            
+
         except Exception as e:
             # Log the error (consider adding proper logging)
             print(f"Error deleting account: {str(e)}")
