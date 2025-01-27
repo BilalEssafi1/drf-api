@@ -35,11 +35,11 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def validate_content(self, value):
         """
-        Validate that the content does not exceed 150 characters
+        Validate that the content does not exceed 250 characters
         """
-        if len(value) > 150:
+        if len(value) > 250:
             raise serializers.ValidationError(
-                "Bio cannot exceed 150 characters."
+                "Bio cannot exceed 250 characters."
             )
         return value
 
