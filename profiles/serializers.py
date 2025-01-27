@@ -33,6 +33,16 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_following_count(self, obj):
         return Follower.objects.filter(owner=obj.owner).count()
 
+    def validate_content(self, value):
+        """
+        Validate that the content does not exceed 150 characters
+        """
+        if len(value) > 150:
+            raise serializers.ValidationError(
+                "Bio cannot exceed 150 characters."
+            )
+        return value
+
     class Meta:
         model = Profile
         fields = [
