@@ -30,6 +30,26 @@ class PostSerializer(serializers.ModelSerializer):
     # For output: return list of tag names
     tags = serializers.SerializerMethodField()
 
+    def validate_title(self, value):
+        """
+        Validate that the title does not exceed 50 characters.
+        """
+        if len(value) > 50:
+            raise serializers.ValidationError(
+                "Title cannot exceed 50 characters."
+            )
+        return value
+
+    def validate_content(self, value):
+        """
+        Validate that the content does not exceed 300 characters.
+        """
+        if len(value) > 300:
+            raise serializers.ValidationError(
+                "Content cannot exceed 300 characters."
+            )
+        return value
+
     def validate_add_hashtags(self, value):
         """
         Validate that hashtags contain only letters, numbers, and underscores
